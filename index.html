@@ -1957,6 +1957,43 @@ position:relative;z-index:1;}
           </div>
         </div>
 
+        <!-- ══ MAINTENANCE MODE CONTROL ══ (hanya developer) -->
+        <div class="panel" id="maintenance-control-panel" style="margin-top:20px;display:none">
+          <div class="panel-head">
+            <div class="panel-title"><div class="p-pip" style="background:#ff9500;box-shadow:0 0 8px rgba(255,149,0,0.6)"></div>🔧 Maintenance Mode</div>
+            <div id="maint-badge" style="font-family:var(--fm);font-size:0.6rem;letter-spacing:2px;padding:3px 10px;border:1px solid;color:var(--em);border-color:var(--em);background:rgba(0,255,148,0.06)">● NORMAL</div>
+          </div>
+          <div class="panel-body">
+            <div style="background:rgba(255,149,0,0.06);border:1px solid rgba(255,149,0,0.25);padding:14px;margin-bottom:16px">
+              <div style="font-family:var(--fm);font-size:0.55rem;color:rgba(255,149,0,0.7);letter-spacing:3px;margin-bottom:8px">⚠ PERINGATAN — DEVELOPER ONLY</div>
+              <div style="font-family:var(--fm);font-size:0.68rem;color:var(--t2);letter-spacing:1px;line-height:1.8">
+                Mengaktifkan Maintenance Mode akan <strong style="color:#fff">memblokir akses seluruh pengguna</strong> (admin & operator) ke halaman ini dan menampilkan halaman UNDER MAINTENANCE dengan redirect ke <span style="color:var(--cr)">bflapps.vercel.app</span>. Hanya Developer yang tetap bisa masuk.
+              </div>
+            </div>
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:16px;background:var(--s2);border:1px solid var(--ln);margin-bottom:16px">
+              <div>
+                <div style="font-size:0.88rem;font-weight:600;color:var(--t1)">Status Maintenance</div>
+                <div id="maint-status-txt" style="font-family:var(--fm);font-size:0.58rem;color:var(--t3);margin-top:3px;letter-spacing:1px">Website berjalan normal</div>
+              </div>
+              <div style="display:flex;gap:10px">
+                <button id="maint-btn-on" onclick="toggleMaintenance(true)"
+                  style="padding:11px 22px;background:rgba(255,149,0,0.15);border:1px solid rgba(255,149,0,0.5);color:#ff9500;font-family:var(--fw);font-size:1rem;letter-spacing:2px;cursor:pointer;transition:all 0.15s"
+                  onmouseover="this.style.background='rgba(255,149,0,0.25)'" onmouseout="this.style.background='rgba(255,149,0,0.15)'">
+                  🔒 AKTIFKAN
+                </button>
+                <button id="maint-btn-off" onclick="toggleMaintenance(false)"
+                  style="padding:11px 22px;background:rgba(0,255,148,0.12);border:1px solid rgba(0,255,148,0.35);color:var(--em);font-family:var(--fw);font-size:1rem;letter-spacing:2px;cursor:pointer;transition:all 0.15s"
+                  onmouseover="this.style.background='rgba(0,255,148,0.22)'" onmouseout="this.style.background='rgba(0,255,148,0.12)'">
+                  🔓 NONAKTIFKAN
+                </button>
+              </div>
+            </div>
+            <div style="font-family:var(--fm);font-size:0.55rem;color:var(--t3);letter-spacing:1px">
+              Perubahan langsung berlaku secara realtime — semua pengguna yang sedang login akan langsung melihat halaman maintenance.
+            </div>
+          </div>
+        </div>
+
       </div>
     </div>
 
@@ -2230,7 +2267,7 @@ position:relative;z-index:1;}
             <div class="panel">
               <div class="panel-head">
                 <div class="panel-title"><div class="p-pip em"></div>Input Produksi</div>
-                <div style="font-family:var(--fm);font-size:0.55rem;color:var(--t3);letter-spacing:2px">Gaji = Jumlah Pcs × <span style="color:var(--em)">$200</span></div>
+                <div style="font-family:var(--fm);font-size:0.55rem;color:var(--t3);letter-spacing:2px">Gaji = Jumlah Pcs × <span style="color:var(--em)">$300</span></div>
               </div>
               <div class="panel-body">
                 <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">
@@ -2257,7 +2294,7 @@ position:relative;z-index:1;}
                     <input id="sal-n-pcs" type="number" min="1" placeholder="100" oninput="salNPreview()"
                       style="width:100%;padding:11px 14px;background:var(--s2);border:1px solid var(--ln);color:var(--t1);font-family:var(--fb);font-size:0.88rem;outline:none"
                       onfocus="this.style.borderColor='var(--cr)'" onblur="this.style.borderColor='var(--ln)'">
-                    <span style="font-family:var(--fm);font-size:0.55rem;color:var(--t3)">@ <span style="color:var(--em)">$200</span> / pcs</span>
+                    <span style="font-family:var(--fm);font-size:0.55rem;color:var(--t3)">@ <span style="color:var(--em)">$300</span> / pcs</span>
                   </div>
                   <div style="display:flex;align-items:flex-end">
                     <div id="sal-n-preview" style="display:none;background:var(--s2);border:1px solid var(--em3);padding:14px;font-family:var(--fm);font-size:0.8rem;width:100%">
@@ -2282,7 +2319,7 @@ position:relative;z-index:1;}
                 <div class="panel-title"><div class="p-pip em"></div>Tarif &amp; Jenis Produksi</div>
               </div>
               <div class="panel-body">
-                <div style="font-family:var(--fm);font-size:0.6rem;color:var(--t3);letter-spacing:1px;margin-bottom:16px">Setiap 1 pcs produk = <span style="color:var(--em)">$200</span> gaji pekerja.</div>
+                <div style="font-family:var(--fm);font-size:0.6rem;color:var(--t3);letter-spacing:1px;margin-bottom:16px">Setiap 1 pcs produk = <span style="color:var(--em)">$300</span> gaji pekerja.</div>
                 <div style="background:var(--s2);border:1px solid var(--ln);padding:12px;margin-bottom:12px">
                   <div style="font-family:var(--fm);font-size:0.5rem;color:var(--t3);letter-spacing:3px;margin-bottom:8px">TOTAL PENDING GAJI</div>
                   <div id="sal-n-total-pending" style="font-family:var(--fw);font-size:1.8rem;color:var(--gd)">$ 0</div>
@@ -2328,11 +2365,11 @@ position:relative;z-index:1;}
           <div class="panel" style="margin-bottom:20px">
             <div class="panel-head">
               <div class="panel-title"><div class="p-pip vi"></div>Alokasi Gaji Cumer (Cuci Uang)</div>
-              <div style="font-family:var(--fm);font-size:0.55rem;color:var(--t3);letter-spacing:2px">33% keuntungan tiap transaksi ÷ jumlah pekerja cuci</div>
+              <div style="font-family:var(--fm);font-size:0.55rem;color:var(--t3);letter-spacing:2px">40% keuntungan tiap transaksi ÷ jumlah pekerja cuci</div>
             </div>
             <div class="panel-body">
               <div style="font-family:var(--fm);font-size:0.65rem;color:var(--t3);margin-bottom:16px;line-height:1.8">
-                ⓘ Data berikut berasal otomatis dari transaksi cuci uang yang memiliki pekerja cuci. Gaji dihitung: <span style="color:var(--vi)">33% dari keuntungan</span> dibagi rata antar pekerja yang cuci.
+                ⓘ Data berikut berasal otomatis dari transaksi cuci uang yang memiliki pekerja cuci. Gaji dihitung: <span style="color:var(--vi)">40% dari keuntungan</span> dibagi rata antar pekerja yang cuci.
               </div>
               <div id="sal-c-list">
                 <div style="padding:40px;text-align:center;color:var(--t3);font-family:var(--fm);font-size:0.7rem;letter-spacing:2px">Memuat data...</div>
@@ -2820,6 +2857,49 @@ position:relative;z-index:1;}
   </div>
 </div>
 
+<!-- ══ MAINTENANCE OVERLAY ══ -->
+<div id="maintenanceOverlay" style="display:none;position:fixed;inset:0;background:#020205;z-index:99999;flex-direction:column;align-items:center;justify-content:center;text-align:center;overflow:hidden">
+  <!-- animated bg grid -->
+  <div style="position:absolute;inset:0;background-image:linear-gradient(rgba(255,45,85,0.04) 1px,transparent 1px),linear-gradient(90deg,rgba(255,45,85,0.04) 1px,transparent 1px);background-size:60px 60px;pointer-events:none"></div>
+  <!-- corner accents -->
+  <div style="position:absolute;top:0;left:0;width:120px;height:120px;border-right:none;border-bottom:none;border-top:2px solid rgba(255,45,85,0.4);border-left:2px solid rgba(255,45,85,0.4)"></div>
+  <div style="position:absolute;top:0;right:0;width:120px;height:120px;border-left:none;border-bottom:none;border-top:2px solid rgba(255,45,85,0.4);border-right:2px solid rgba(255,45,85,0.4)"></div>
+  <div style="position:absolute;bottom:0;left:0;width:120px;height:120px;border-right:none;border-top:none;border-bottom:2px solid rgba(255,45,85,0.4);border-left:2px solid rgba(255,45,85,0.4)"></div>
+  <div style="position:absolute;bottom:0;right:0;width:120px;height:120px;border-left:none;border-top:none;border-bottom:2px solid rgba(255,45,85,0.4);border-right:2px solid rgba(255,45,85,0.4)"></div>
+  <!-- glow orb -->
+  <div style="position:absolute;width:600px;height:600px;border-radius:50%;background:radial-gradient(circle,rgba(255,45,85,0.07) 0%,transparent 70%);pointer-events:none;top:50%;left:50%;transform:translate(-50%,-50%)"></div>
+  <!-- content -->
+  <div style="position:relative;z-index:1;max-width:680px;padding:0 24px">
+    <div style="font-family:'IBM Plex Mono',monospace;font-size:0.58rem;color:rgba(255,45,85,0.7);letter-spacing:5px;margin-bottom:28px;display:flex;align-items:center;justify-content:center;gap:10px">
+      <span style="width:32px;height:1px;background:rgba(255,45,85,0.5);display:inline-block"></span>
+      SYSTEM STATUS
+      <span style="width:32px;height:1px;background:rgba(255,45,85,0.5);display:inline-block"></span>
+    </div>
+    <div style="font-family:'Bebas Neue',sans-serif;font-size:clamp(3.5rem,10vw,7rem);color:#fff;line-height:0.85;letter-spacing:3px;margin-bottom:12px">
+      UNDER<br><span style="color:var(--cr)">MAINTENANCE</span>
+    </div>
+    <div style="width:100%;height:2px;background:linear-gradient(90deg,transparent,var(--cr),transparent);margin:28px 0"></div>
+    <div style="font-family:'IBM Plex Mono',monospace;font-size:0.72rem;color:rgba(240,240,248,0.6);letter-spacing:2px;line-height:2;margin-bottom:32px">
+      WEBSITE SEDANG DALAM PERBAIKAN<br>
+      <span style="color:rgba(240,240,248,0.35)">Sistem sementara tidak bisa diakses. Mohon bersabar.</span>
+    </div>
+    <div style="background:rgba(255,45,85,0.06);border:1px solid rgba(255,45,85,0.3);padding:20px 28px;margin-bottom:28px">
+      <div style="font-family:'IBM Plex Mono',monospace;font-size:0.55rem;color:rgba(255,45,85,0.6);letter-spacing:4px;margin-bottom:10px">AKSES SEMENTARA</div>
+      <div style="font-family:'IBM Plex Mono',monospace;font-size:0.82rem;color:#fff;letter-spacing:2px">
+        Silakan gunakan:
+        <a href="https://bflapps.vercel.app" target="_blank"
+          style="color:var(--cr);text-decoration:none;display:inline-flex;align-items:center;gap:6px;margin-top:8px;font-size:0.9rem;letter-spacing:1px">
+          <span style="font-family:'Bebas Neue',sans-serif;font-size:1.3rem;letter-spacing:2px">bflapps.vercel.app</span>
+          <span style="font-size:0.7rem">↗</span>
+        </a>
+      </div>
+    </div>
+    <div style="font-family:'IBM Plex Mono',monospace;font-size:0.52rem;color:rgba(255,255,255,0.18);letter-spacing:3px">
+      BFL MANAGEMENT SYSTEM • <span id="maint-ts">—</span>
+    </div>
+  </div>
+</div>
+
 <!-- ══ MODAL EDIT STATUS MEMBER ══ -->
 <div id="editMemberOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.92);z-index:600;align-items:center;justify-content:center">
   <div style="background:var(--s1);border:1px solid var(--cr);width:92%;max-width:440px">
@@ -3186,6 +3266,78 @@ function stopDevHeartbeat(){
   setDevPresence(false);
 }
 
+// ─── MAINTENANCE MODE ─────────────────────────────────────────────
+let _maintActive=false;
+
+async function fbLoadMaintenance(){
+  try{
+    const snap=await getDoc(doc(db,'config','maintenance'));
+    _maintActive=snap.exists()&&snap.data().active===true;
+    applyMaintenanceUI(_maintActive);
+    // Kalau maintenance aktif dan bukan developer, tampilkan overlay
+    if(_maintActive&&currentUser.role!=='developer') showMaintenanceOverlay();
+  }catch(e){console.warn('Maintenance load gagal:',e);}
+}
+
+function startMaintenanceListener(){
+  onSnapshot(doc(db,'config','maintenance'),snap=>{
+    const active=snap.exists()&&snap.data().active===true;
+    _maintActive=active;
+    applyMaintenanceUI(active);
+    if(active&&currentUser.role!=='developer'){
+      showMaintenanceOverlay();
+    }else{
+      hideMaintenanceOverlay();
+    }
+  });
+}
+
+function showMaintenanceOverlay(){
+  const el=document.getElementById('maintenanceOverlay');
+  if(el){
+    el.style.display='flex';
+    const ts=document.getElementById('maint-ts');
+    if(ts)ts.textContent=new Date().toLocaleString('id-ID');
+  }
+}
+function hideMaintenanceOverlay(){
+  const el=document.getElementById('maintenanceOverlay');
+  if(el)el.style.display='none';
+}
+
+function applyMaintenanceUI(active){
+  const badge=document.getElementById('maint-badge');
+  const txt=document.getElementById('maint-status-txt');
+  if(badge){
+    badge.textContent=active?'⚠ MAINTENANCE':'● NORMAL';
+    badge.style.color=active?'#ff9500':'var(--em)';
+    badge.style.borderColor=active?'rgba(255,149,0,0.7)':'var(--em)';
+    badge.style.background=active?'rgba(255,149,0,0.1)':'rgba(0,255,148,0.06)';
+  }
+  if(txt)txt.textContent=active?'🔴 Website sedang dalam maintenance — akses diblokir':'🟢 Website berjalan normal';
+}
+
+async function toggleMaintenance(active){
+  if(currentUser.role!=='developer'){alert('⚠ Hanya Developer yang bisa mengubah status maintenance!');return;}
+  const label=active?'AKTIFKAN MAINTENANCE MODE':'NONAKTIFKAN MAINTENANCE MODE';
+  if(!confirm(label+'?\n\n'+(active?'Seluruh pengguna akan diarahkan ke halaman maintenance.':'Pengguna bisa kembali mengakses sistem.')))return;
+  try{
+    await setDoc(doc(db,'config','maintenance'),{
+      active,
+      updatedBy:currentUser.username,
+      updatedAt:Date.now()
+    });
+    await logActivity(active?'MAINTENANCE_ON':'MAINTENANCE_OFF',
+      (active?'Mengaktifkan':'Menonaktifkan')+' maintenance mode');
+    await notifyDevUpdate('🔧 '+(active?'MAINTENANCE MODE AKTIF':'MAINTENANCE MODE DINONAKTIFKAN'),[
+      active?'Website sementara diblokir untuk maintenance':'Website kembali bisa diakses normal',
+      'Dilakukan oleh: '+currentUser.username,
+      active?'Redirect ke: bflapps.vercel.app':''
+    ].filter(Boolean));
+  }catch(e){alert('⚠ Gagal mengubah status: '+e.message);}
+}
+window.toggleMaintenance=toggleMaintenance;
+
 // UTILS
 function fmt(n){return'$ '+Math.round(n).toLocaleString('id-ID')}
 function genId(){return'TX-'+Math.random().toString(36).substr(2,8).toUpperCase()}
@@ -3264,6 +3416,9 @@ function applyRoleUI(){
   // Discord panel: hanya developer yang bisa lihat
   const discordPanel=document.getElementById('discord-setting-panel');
   if(discordPanel)discordPanel.style.display=isDev?'block':'none';
+  // Maintenance panel: hanya developer
+  const maintPanel=document.getElementById('maintenance-control-panel');
+  if(maintPanel)maintPanel.style.display=isDev?'block':'none';
 }
 
 // LOGIN
@@ -4073,20 +4228,264 @@ async function saveEdit(){
   }
 }
 
-// EXPORT
+// ─── EXPORT EXCEL DENGAN TEMPLATE ────────────────────────────────
 function exportExcel(){
   if(transactions.length===0){alert('Belum ada data!');return}
-  const data=[
-    ['ID','Kelompok','Tanggal','Uang Merah','Potongan Tahap 1','Potongan Tahap 2','Uang Hijau','Pajak High Table','Yang Cuci','Yang Backup','Diinput Oleh','Catatan','Status'],
-    ...transactions.map(tx=>[tx.id,tx.kelompok,tx.tanggal,tx.jumlah,tx.pot1,tx.pot2,tx.bersih,
-      tx.pajak||tx.pot1,tx.pekerjaCuci||tx.pekerja||'',tx.pekerjaBackup||'',tx.inputBy||'',tx.catatan||'',
-      tx.status==='done'?'Berhasil':tx.status==='cancel'?'Cancel':'Dalam Proses'])
-  ];
-  const ws=XLSX.utils.aoa_to_sheet(data);
-  ws['!cols']=[10,20,12,15,18,18,15,18,16,16,18,20,12].map(w=>({wch:w}));
+
   const wb=XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb,ws,'Transaksi BFL');
-  XLSX.writeFile(wb,'BFL-'+new Date().toLocaleDateString('id-ID').replace(/\//g,'-')+'.xlsx');
+  const now=new Date();
+  const dateStr=now.toLocaleDateString('id-ID',{day:'2-digit',month:'long',year:'numeric'});
+  const timeStr=now.toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'});
+
+  // ── Warna Tema (ARGB hex) ──
+  const C_BG_TITLE='FF1A1A2E';   // biru gelap
+  const C_RED     ='FFFF2D55';   // merah BFL
+  const C_GREEN   ='FF00C851';   // hijau
+  const C_GOLD    ='FFFFB800';   // emas
+  const C_PURPLE  ='FFA855F7';   // ungu
+  const C_HEADER  ='FF0D0D1A';   // header row
+  const C_ROW_ODD ='FF0B0B15';   // row ganjil
+  const C_ROW_EVN ='FF10101C';   // row genap
+  const C_WHITE   ='FFF0F0F8';   // teks terang
+  const C_GRAY    ='FF6B6B85';   // teks redup
+  const C_DONE    ='FF0A2A14';   // bg done
+  const C_CANCEL  ='FF2A0A10';   // bg cancel
+  const C_PEND    ='FF1A1500';   // bg pending
+  const C_DONE_TXT='FF00FF94';
+  const C_CANCEL_TXT='FFFF2D55';
+  const C_PEND_TXT='FFFFB800';
+  const C_BORDER  ='FF1C1C2A';
+
+  // ── Helper: style cell ──
+  function styleCell(ws, addr, opts={}){
+    if(!ws[addr]) ws[addr]={t:'s',v:''};
+    ws[addr].s={
+      font:{
+        name:'Calibri',
+        sz:opts.sz||10,
+        bold:opts.bold||false,
+        color:{rgb:opts.fc||C_WHITE},
+        italic:opts.italic||false,
+      },
+      fill:{fgColor:{rgb:opts.bg||'FF020205'},patternType:'solid'},
+      alignment:{
+        horizontal:opts.h||'left',
+        vertical:'center',
+        wrapText:opts.wrap||false,
+      },
+      border:{
+        top   :{style:'thin',color:{rgb:C_BORDER}},
+        bottom:{style:'thin',color:{rgb:C_BORDER}},
+        left  :{style:'thin',color:{rgb:C_BORDER}},
+        right :{style:'thin',color:{rgb:C_BORDER}},
+      },
+      ...(opts.s||{})
+    };
+  }
+
+  // ── Sheet 1: TRANSAKSI ──────────────────────────────────────────
+  const headers=[
+    'NO','ID TRANSAKSI','NAMA KELOMPOK','TANGGAL','UANG MERAH ($)',
+    'POTONGAN 1 ($)','POTONGAN 2 ($)','UANG HIJAU ($)','PAJAK HT ($)',
+    'YANG CUCI','YANG BACKUP','DIINPUT OLEH','CATATAN','STATUS'
+  ];
+  const colWidths=[5,16,22,12,16,14,14,14,14,18,18,18,22,12];
+  const HEADER_ROW=3; // 0-indexed row for header (after 2 title rows)
+  const DATA_START=4;
+
+  // Build aoa: row 0 = title, row 1 = meta, row 2 blank, row 3 = headers, row 4+ = data
+  const aoa=[
+    ['BFL MANAGEMENT SYSTEM — LAPORAN TRANSAKSI CUCI UANG','','','','','','','','','','','','',''],
+    ['Diekspor: '+dateStr+' pukul '+timeStr+' WIB  |  Total: '+transactions.length+' transaksi  |  Eksportir: '+currentUser.username,'','','','','','','','','','','','',''],
+    ['','','','','','','','','','','','','',''],
+    ...transactions.map((tx,i)=>[
+      i+1,
+      tx.id,
+      tx.kelompok,
+      tx.tanggal,
+      tx.jumlah,
+      tx.pot1,
+      tx.pot2,
+      tx.bersih,
+      tx.pajak||0,
+      tx.pekerjaCuci||tx.pekerja||'',
+      tx.pekerjaBackup||'',
+      tx.inputBy||'',
+      tx.catatan||'',
+      tx.status==='done'?'BERHASIL':tx.status==='cancel'?'CANCEL':'DALAM PROSES'
+    ])
+  ];
+  // Insert header row after blank
+  aoa.splice(3,0,headers);
+
+  const ws=XLSX.utils.aoa_to_sheet(aoa);
+
+  // Column widths
+  ws['!cols']=colWidths.map(w=>({wch:w}));
+  // Freeze panes: freeze title+meta+blank+header = 4 rows
+  ws['!freeze']={xSplit:0,ySplit:4};
+
+  // Merge title across all cols
+  ws['!merges']=[
+    {s:{r:0,c:0},e:{r:0,c:13}},
+    {s:{r:1,c:0},e:{r:1,c:13}},
+    {s:{r:2,c:0},e:{r:2,c:13}},
+  ];
+
+  const totalRows=transactions.length+4; // 0..totalRows-1
+
+  // Style all cells
+  const alpha='ABCDEFGHIJKLMN';
+  for(let r=0;r<totalRows;r++){
+    for(let c=0;c<14;c++){
+      const addr=alpha[c]+(r+1);
+      if(r===0){
+        styleCell(ws,addr,{bg:C_BG_TITLE,fc:C_RED,sz:16,bold:true,h:'center'});
+      }else if(r===1){
+        styleCell(ws,addr,{bg:C_BG_TITLE,fc:C_GRAY,sz:9,h:'center',italic:true});
+      }else if(r===2){
+        styleCell(ws,addr,{bg:'FF020205',fc:'FF020205'});
+      }else if(r===3){
+        // header row
+        const hdrColors=[C_GRAY,C_GRAY,C_RED,C_GOLD,C_RED,C_RED,C_RED,C_GREEN,C_PURPLE,C_WHITE,C_WHITE,C_WHITE,C_GRAY,C_GOLD];
+        styleCell(ws,addr,{bg:C_HEADER,fc:hdrColors[c]||C_WHITE,sz:9,bold:true,h:'center',
+          s:{border:{top:{style:'medium',color:{rgb:C_RED}},bottom:{style:'medium',color:{rgb:C_RED}},left:{style:'thin',color:{rgb:C_BORDER}},right:{style:'thin',color:{rgb:C_BORDER}}}}});
+      }else{
+        // data rows
+        const tx=transactions[r-4];
+        const isOdd=(r%2)===0;
+        let bgColor=isOdd?C_ROW_ODD:C_ROW_EVN;
+        let fc=C_WHITE;
+        // Status column (col 13)
+        if(c===13){
+          if(tx.status==='done'){bgColor=C_DONE;fc=C_DONE_TXT;}
+          else if(tx.status==='cancel'){bgColor=C_CANCEL;fc=C_CANCEL_TXT;}
+          else{bgColor=C_PEND;fc=C_PEND_TXT;}
+        }
+        // Number cols
+        if(c===4)fc=C_RED;
+        if(c===5||c===6)fc=C_RED;
+        if(c===7)fc=C_GREEN;
+        if(c===8)fc=C_PURPLE;
+        const isNum=(c>=4&&c<=8);
+        styleCell(ws,addr,{bg:bgColor,fc,h:c===0?'center':(isNum?'right':'left'),sz:9});
+        // Format number cells
+        if(isNum&&ws[addr]){ws[addr].t='n';ws[addr].z='#,##0';}
+      }
+    }
+  }
+
+  // Row heights
+  ws['!rows']=[];
+  ws['!rows'][0]={hpt:36};
+  ws['!rows'][1]={hpt:20};
+  ws['!rows'][2]={hpt:8};
+  ws['!rows'][3]={hpt:26};
+  for(let r=4;r<totalRows;r++) ws['!rows'][r]={hpt:18};
+
+  XLSX.utils.book_append_sheet(wb,ws,'Transaksi');
+
+  // ── Sheet 2: REKAP BULANAN ──────────────────────────────────────
+  const months=[...new Set(transactions.map(t=>t.tanggal.substring(0,7)))].sort().reverse();
+  const rekap=[
+    ['BFL — REKAP BULANAN','','','','',''],
+    ['','','','','',''],
+    ['BULAN','TOTAL TRX','UANG MERAH','UANG HIJAU','KEUNTUNGAN BFL','PAJAK HIGH TABLE'],
+    ...months.map(m=>{
+      const d=transactions.filter(t=>t.tanggal.startsWith(m));
+      const masuk=d.reduce((s,t)=>s+t.jumlah,0);
+      const bersih=d.reduce((s,t)=>s+t.bersih,0);
+      const profit=d.reduce((s,t)=>s+(t.profit||t.pot2),0);
+      const pajak=d.reduce((s,t)=>s+(t.pajak||0),0);
+      const [y,mo]=m.split('-');
+      const label=new Date(y,mo-1).toLocaleDateString('id-ID',{month:'long',year:'numeric'});
+      return[label,d.length,masuk,bersih,profit,pajak];
+    })
+  ];
+  const wsR=XLSX.utils.aoa_to_sheet(rekap);
+  wsR['!cols']=[22,10,16,16,16,18].map(w=>({wch:w}));
+  wsR['!merges']=[{s:{r:0,c:0},e:{r:0,c:5}}];
+  const alphaR='ABCDEF';
+  const rekapTotal=rekap.length;
+  for(let r=0;r<rekapTotal;r++){
+    for(let c=0;c<6;c++){
+      const addr=alphaR[c]+(r+1);
+      if(r===0) styleCell(wsR,addr,{bg:C_BG_TITLE,fc:C_RED,sz:14,bold:true,h:'center'});
+      else if(r===1) styleCell(wsR,addr,{bg:'FF020205',fc:'FF020205'});
+      else if(r===2){
+        const hc=[C_GOLD,C_GRAY,C_RED,C_GREEN,C_GOLD,C_PURPLE];
+        styleCell(wsR,addr,{bg:C_HEADER,fc:hc[c],sz:9,bold:true,h:'center'});
+      }else{
+        const isNum=c>=1;
+        const fcs=[C_WHITE,C_GRAY,C_RED,C_GREEN,C_GOLD,C_PURPLE];
+        styleCell(wsR,addr,{bg:(r%2===0?C_ROW_ODD:C_ROW_EVN),fc:fcs[c],sz:9,h:isNum?'right':'left'});
+        if(isNum&&wsR[addr]&&c>=2){wsR[addr].t='n';wsR[addr].z='#,##0';}
+      }
+    }
+  }
+  wsR['!rows']=[{hpt:32},{hpt:6},{hpt:24}];
+  for(let r=3;r<rekapTotal;r++) wsR['!rows'][r]={hpt:18};
+  XLSX.utils.book_append_sheet(wb,wsR,'Rekap Bulanan');
+
+  // ── Sheet 3: SUMMARY STATISTIK ──────────────────────────────────
+  const totalMasuk=transactions.reduce((s,t)=>s+t.jumlah,0);
+  const totalBersih=transactions.reduce((s,t)=>s+t.bersih,0);
+  const totalProfit=transactions.reduce((s,t)=>s+(t.profit||t.pot2),0);
+  const totalPajak=transactions.reduce((s,t)=>s+(t.pajak||0),0);
+  const done=transactions.filter(t=>t.status==='done').length;
+  const cancel=transactions.filter(t=>t.status==='cancel').length;
+  const pending=transactions.filter(t=>t.status==='pending').length;
+  const summaryData=[
+    ['BFL MANAGEMENT SYSTEM — SUMMARY STATISTIK',''],
+    ['Digenerate: '+dateStr,''],
+    ['',''],
+    ['STATISTIK UMUM',''],
+    ['Total Transaksi',transactions.length],
+    ['Transaksi Berhasil',done],
+    ['Transaksi Cancel',cancel],
+    ['Transaksi Dalam Proses',pending],
+    ['Success Rate (Berhasil)',transactions.length>0?((done/transactions.length)*100).toFixed(1)+'%':'—'],
+    ['',''],
+    ['FINANSIAL (ALL TIME)',''],
+    ['Total Uang Merah Masuk',totalMasuk],
+    ['Total Uang Hijau Keluar',totalBersih],
+    ['Total Keuntungan BFL',totalProfit],
+    ['Total Pajak High Table',totalPajak],
+    ['',''],
+    ['KETERANGAN EXPORT',''],
+    ['Waktu Export',dateStr+' '+timeStr+' WIB'],
+    ['Diekspor Oleh',currentUser.username],
+    ['Total Bulan Aktif',months.length+' bulan'],
+  ];
+  const wsS=XLSX.utils.aoa_to_sheet(summaryData);
+  wsS['!cols']=[{wch:26},{wch:22}];
+  wsS['!merges']=[{s:{r:0,c:0},e:{r:0,c:1}},{s:{r:1,c:0},e:{r:1,c:1}}];
+  const sectionRows=[3,10,16];
+  for(let r=0;r<summaryData.length;r++){
+    for(let c=0;c<2;c++){
+      const addr=(c===0?'A':'B')+(r+1);
+      if(r===0) styleCell(wsS,addr,{bg:C_BG_TITLE,fc:C_RED,sz:14,bold:true,h:'center'});
+      else if(r===1) styleCell(wsS,addr,{bg:C_BG_TITLE,fc:C_GRAY,sz:9,h:'center',italic:true});
+      else if(r===2||summaryData[r][0]==='') styleCell(wsS,addr,{bg:'FF020205',fc:'FF020205'});
+      else if(sectionRows.includes(r)) styleCell(wsS,addr,{bg:C_HEADER,fc:c===0?C_RED:C_WHITE,sz:10,bold:true});
+      else{
+        let fc=c===0?C_GRAY:C_WHITE;
+        // Warnai baris finansial
+        if(r===11)fc=c===1?C_RED:C_GRAY;
+        else if(r===12)fc=c===1?C_GREEN:C_GRAY;
+        else if(r===13)fc=c===1?C_GOLD:C_GRAY;
+        else if(r===14)fc=c===1?C_PURPLE:C_GRAY;
+        styleCell(wsS,addr,{bg:(r%2===0?C_ROW_ODD:C_ROW_EVN),fc,sz:9,h:c===1?'right':'left'});
+        if(c===1&&wsS[addr]&&typeof summaryData[r][1]==='number'){wsS[addr].t='n';wsS[addr].z='#,##0';}
+      }
+    }
+  }
+  wsS['!rows']=[{hpt:32},{hpt:18}];
+  for(let r=2;r<summaryData.length;r++) wsS['!rows'][r]={hpt:r===2||summaryData[r][0]===''?6:20};
+  XLSX.utils.book_append_sheet(wb,wsS,'Summary');
+
+  const fname='BFL-EXPORT-'+now.toISOString().split('T')[0]+'.xlsx';
+  XLSX.writeFile(wb,fname);
 }
 
 // RESET ALL DATA
@@ -4164,7 +4563,9 @@ async function initApp(){
   await fbLoadOrder();
   await fbLoadOrderWebhook();
   await fbLoadDiscordConfig();
+  await fbLoadMaintenance();
   startRealtimeSync();
+  startMaintenanceListener();
   checkAutoReset();
   checkAutoResetSetoran();
   checkAutoResetOrder();
@@ -6054,7 +6455,7 @@ function salNPenerimaPick(v){
 function salNPenerimaAcClose(){document.getElementById('sal-n-penerima-ac').style.display='none';}
 function salNPreview(){
   const pcs=parseFloat(document.getElementById('sal-n-pcs').value)||0;
-  const gaji=pcs*200;
+  const gaji=pcs*300;
   const prev=document.getElementById('sal-n-preview');
   if(pcs>0){
     prev.style.display='block';
@@ -6067,7 +6468,7 @@ async function salNSave(){
   const jenis=document.getElementById('sal-n-jenis').value;
   const pcs=parseFloat(document.getElementById('sal-n-pcs').value)||0;
   if(!member||!jenis||!pcs){alert('⚠ Isi semua field!');return}
-  const gaji=pcs*200;
+  const gaji=pcs*300;
   // penerima dikosongkan dulu — diisi inline di tabel setelah disimpan
   const item={id:genSalaryId(),member,jenis,pcs,gaji,penerima:'',statusGaji:'belum',ts:Date.now(),createdBy:currentUser.username||'—'};
   salaryNanamList.push(item);
@@ -6164,7 +6565,7 @@ function renderSalaryCumer(){
     const cuciArr=(tx.pekerjaCuci||tx.pekerja||'').split(',').map(s=>s.trim()).filter(Boolean);
     const backupArr=(tx.pekerjaBackup||'').split(',').map(s=>s.trim()).filter(Boolean);
     const profit=tx.profit||tx.pot2||0;
-    const totalGajiPool=Math.round(profit*0.33);
+    const totalGajiPool=Math.round(profit*0.40);
     const pajakTx=tx.pajak||0;
     const profitBersih=profit-totalGajiPool-pajakTx;
     // Bobot total
@@ -6206,7 +6607,7 @@ function renderSalaryCumer(){
           <div style="font-family:var(--fw);font-size:0.9rem;color:var(--gd);margin-top:2px">${fmt(profit)}</div>
         </div>
         <div>
-          <div style="font-family:var(--fm);font-size:0.48rem;color:var(--t3);letter-spacing:2px">ALOKASI GAJI (33%)</div>
+          <div style="font-family:var(--fm);font-size:0.48rem;color:var(--t3);letter-spacing:2px">ALOKASI GAJI (40%)</div>
           <div style="font-family:var(--fw);font-size:0.9rem;color:var(--vi);margin-top:2px">${fmt(totalGajiPool)}</div>
           <div style="font-family:var(--fm);font-size:0.48rem;color:var(--t3);margin-top:2px">${bobotInfo}</div>
         </div>
