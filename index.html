@@ -6144,7 +6144,16 @@ async function salJSave(){
 async function salJToggleStatus(id){
   const item=salaryJualanList.find(x=>x.id===id);
   if(!item)return;
-  item.statusGaji=item.statusGaji==='lunas'?'belum':'lunas';
+  const akanLunas=item.statusGaji!=='lunas';
+  if(akanLunas){
+    // Sudah dibayar → langsung pindah ke Arsip & hapus dari daftar aktif
+    item.statusGaji='lunas';
+    await archiveSalaryItem('jualan',item,'salary_jualan');
+    salaryJualanList=salaryJualanList.filter(x=>x.id!==id);
+    renderSalaryJualan();
+    return;
+  }
+  item.statusGaji='belum';
   await fbSaveSalaryItem('salary_jualan',item);
   renderSalaryJualan();
 }
@@ -6520,7 +6529,16 @@ async function salNSave(){
 async function salNToggleStatus(id){
   const item=salaryNanamList.find(x=>x.id===id);
   if(!item)return;
-  item.statusGaji=item.statusGaji==='lunas'?'belum':'lunas';
+  const akanLunas=item.statusGaji!=='lunas';
+  if(akanLunas){
+    // Sudah dibayar → langsung pindah ke Arsip & hapus dari daftar aktif
+    item.statusGaji='lunas';
+    await archiveSalaryItem('nanam',item,'salary_nanam');
+    salaryNanamList=salaryNanamList.filter(x=>x.id!==id);
+    renderSalaryNanam();
+    return;
+  }
+  item.statusGaji='belum';
   await fbSaveSalaryItem('salary_nanam',item);
   renderSalaryNanam();
 }
@@ -6585,10 +6603,24 @@ function renderSalaryCumer(){
   const emptyEl=document.getElementById('sal-c-empty');
   if(!listEl)return;
 
-  // Filter transaksi yang punya pekerja cuci & status done
-  const txWithPekerja=transactions.filter(tx=>(tx.pekerjaCuci||tx.pekerja||'').trim().length>0);
+  // Hanya transaksi MINGGU INI (minggu lalu sudah otomatis diarsipkan) — biar tidak makan banyak ruang
+  const _now0=new Date();
+  const _day0=_now0.getDay();
+  const _diffToMon0=_day0===0?6:_day0-1;
+  const _monStart0=new Date(_now0);
+  _monStart0.setHours(0,0,0,0);
+  _monStart0.setDate(_now0.getDate()-_diffToMon0);
+  const _sunEnd0=new Date(_monStart0);
+  _sunEnd0.setDate(_monStart0.getDate()+7);
+
+  // Filter transaksi yang punya pekerja cuci & masih dalam minggu berjalan
+  const txWithPekerja=transactions.filter(tx=>{
+    if((tx.pekerjaCuci||tx.pekerja||'').trim().length===0)return false;
+    const ts=tx.ts||tx.createdAt||0;
+    return ts>=_monStart0.getTime()&&ts<_sunEnd0.getTime();
+  });
   if(!txWithPekerja.length){
-    listEl.innerHTML='<div style="padding:40px;text-align:center;color:var(--t3);font-family:var(--fm);font-size:0.7rem;letter-spacing:2px">BELUM ADA TRANSAKSI DENGAN PEKERJA CUCI</div>';
+    listEl.innerHTML='<div style="padding:40px;text-align:center;color:var(--t3);font-family:var(--fm);font-size:0.7rem;letter-spacing:2px">BELUM ADA TRANSAKSI MINGGU INI · cek di Arsip untuk riwayat minggu lalu</div>';
     if(emptyEl)emptyEl.style.display='block';
     if(summaryTbody)summaryTbody.innerHTML='';
     return;
@@ -6788,6 +6820,31 @@ async function fbSaveArsipEntry(item){
   }catch(e){ console.error('Gagal simpan arsipGaji:',e); }
 }
 
+// Arsipkan 1 item gaji Jualan/Nanam begitu ditandai SUDAH DIBAYAR, lalu hapus dari koleksi aktif
+async function archiveSalaryItem(kategori,item,col){
+  try{
+    const dt=new Date(item.ts||Date.now());
+    const weekLabel=dt.toLocaleDateString('id-ID',{day:'2-digit',month:'short',year:'numeric'});
+    const isJualan=kategori==='jualan';
+    const countLabel=isJualan?(item.qty||0)+' pcs':(item.pcs||0)+' pcs';
+    const roleLabel=isJualan?(item.barang||'—'):(item.jenis||'—');
+    const arsipItem={
+      id:kategori+'_'+item.id,
+      kategori,
+      weekLabel,
+      weekStart:item.ts||Date.now(),
+      weekEnd:item.ts||Date.now(),
+      data:[{nama:item.member,role:roleLabel,count:0,countLabel,total:item.gaji||0,status:'lunas',penerima:item.penerima||'—'}],
+      archivedAt:Date.now()
+    };
+    arsipGaji.unshift(arsipItem);
+    await fbSaveArsipEntry(arsipItem);
+    await fbDeleteSalaryItem(col,item.id);
+    logActivity('ARSIP_GAJI','['+kategori.toUpperCase()+'] '+item.member+' — '+fmt(item.gaji||0)+' (sudah dibayar → diarsipkan)');
+    if(typeof renderArsipPage==='function')renderArsipPage();
+  }catch(e){ console.error('Gagal arsipkan item salary:',e); }
+}
+
 // Cek & arsipkan gaji Cumer minggu lalu (dipanggil saat auto-reset mingguan Senin 00:00 WIB)
 async function archiveCumerWeekIfNeeded(){
   const wib=new Date(Date.now()+7*3600000);
@@ -6876,7 +6933,7 @@ function renderArsipPage(){
       return`<tr>
         <td style="font-weight:600">${d.nama}</td>
         <td><span style="font-family:var(--fm);font-size:0.6rem;padding:2px 8px;border:1px solid ${d.role==='backup'?'rgba(255,184,0,0.4)':'rgba(168,85,247,0.4)'};color:${d.role==='backup'?'var(--gd)':'var(--vi)'}">${(d.role||'').toUpperCase()}</span></td>
-        <td style="font-family:var(--fm);color:var(--t3)">${d.count} transaksi</td>
+        <td style="font-family:var(--fm);color:var(--t3)">${d.countLabel||(d.count+' transaksi')}</td>
         <td style="font-family:var(--fw);font-size:0.95rem;color:var(--vi)">${fmt(d.total)}</td>
         <td><span style="font-family:var(--fm);font-size:0.6rem;padding:4px 10px;border:1px solid ${isPaid?'rgba(0,255,148,0.4)':'rgba(255,45,85,0.3)'};color:${isPaid?'var(--em)':'var(--cr)'}">${isPaid?'✓ SUDAH DIBAYAR':'✗ BELUM DIBAYAR'}</span></td>
       </tr>`;
@@ -6885,7 +6942,7 @@ function renderArsipPage(){
     return`<div style="border:1px solid var(--ln);margin-bottom:16px;overflow:hidden">
       <div style="padding:12px 16px;background:var(--s2);border-bottom:1px solid var(--ln);display:flex;justify-content:space-between;align-items:center">
         <div>
-          <div style="font-family:var(--fm);font-size:0.5rem;color:var(--t3);letter-spacing:2px">MINGGU</div>
+          <div style="font-family:var(--fm);font-size:0.5rem;color:var(--t3);letter-spacing:2px">${e.kategori==='cumer'?'MINGGU':'TANGGAL'}</div>
           <div style="font-size:0.9rem;font-weight:600;margin-top:2px">${e.weekLabel}</div>
         </div>
         <div style="text-align:right">
