@@ -1146,6 +1146,9 @@ position:relative;z-index:1;}
       <div class="nav-item" onclick="showPage('order')">
         <span class="ni">📦</span> Order
       </div>
+      <div class="nav-item" onclick="showPage('arsip')">
+        <span class="ni">🗄️</span> Arsip
+      </div>
       <div class="nav-item" id="nav-users" style="display:none" onclick="showPage('users')">
         <span class="ni">🔐</span> Manajemen Operator
       </div>
@@ -1794,6 +1797,24 @@ position:relative;z-index:1;}
             </div>
             <div id="order-history-result" style="font-family:var(--fm);font-size:0.7rem;color:var(--t3)">Pilih minggu untuk melihat rekap order.</div>
           </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ ARSIP GAJI ══ -->
+    <div class="page" id="page-arsip">
+      <div class="page-header">
+        <div class="ph-title">🗄️ ARSIP GAJI</div>
+        <div class="ph-sub">// rekap gaji yang sudah diarsipkan otomatis setiap reset mingguan</div>
+      </div>
+      <div class="card" style="padding:0">
+        <div style="display:flex;border-bottom:1px solid var(--ln)">
+          <button id="arsip-tab-jualan" onclick="switchArsipTab('jualan')" style="flex:1;padding:12px;background:transparent;border:none;border-right:1px solid var(--ln);color:var(--t3);font-family:var(--fw);font-size:0.95rem;letter-spacing:2px;cursor:pointer">🔴 JUALAN</button>
+          <button id="arsip-tab-nanam" onclick="switchArsipTab('nanam')" style="flex:1;padding:12px;background:transparent;border:none;border-right:1px solid var(--ln);color:var(--t3);font-family:var(--fw);font-size:0.95rem;letter-spacing:2px;cursor:pointer">🌿 NANAM & OLAH</button>
+          <button id="arsip-tab-cumer" onclick="switchArsipTab('cumer')" style="flex:1;padding:12px;background:var(--cr3);border:none;color:var(--cr);font-family:var(--fw);font-size:0.95rem;letter-spacing:2px;cursor:pointer">🧺 CUMER</button>
+        </div>
+        <div style="padding:20px" id="arsip-list">
+          <div style="padding:40px;text-align:center;color:var(--t3);font-family:var(--fm);font-size:0.7rem;letter-spacing:2px">MEMUAT ARSIP...</div>
         </div>
       </div>
     </div>
@@ -2995,6 +3016,8 @@ const db=getFirestore(app);
 // ─── STATE ────────────────────────────────────────────────────────
 let transactions=[];
 let cumerPayStatus={}; // { namaPerkerja: 'lunas'|'belum' }
+let arsipGaji=[]; // [{id,kategori:'cumer'|'nanam'|'jualan',weekLabel,weekStart,weekEnd,data:[{nama,role,count,total,status}],archivedAt}]
+let activeArsipTab='cumer';
 let weeklyData={masuk:0,bersih:0,profit:0,pot1:0,pot2:0,pajak:0,count:0,startedAt:Date.now()};
 let currentUser={username:'',role:''}; // role: 'admin' (akun utama) atau 'operator'
 const MASTER_USERNAME='teambfl'; // akses: Log Aktivitas
@@ -3759,7 +3782,7 @@ function showPage(id){
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
   document.getElementById('page-'+id).classList.add('active');
-  const map={dashboard:0,cuci:1,history:2,rekap:3,member:4,salary:5,order:6,users:7,logs:8};
+  const map={dashboard:0,cuci:1,history:2,rekap:3,member:4,salary:5,order:6,arsip:7,users:8,logs:9};
   const items=document.querySelectorAll('.nav-item');
   if(items[map[id]])items[map[id]].classList.add('active');
   if(document.getElementById('sidebar').classList.contains('open'))toggleSidebar();
@@ -3770,6 +3793,7 @@ function showPage(id){
   if(id==='member'){renderMember();updateMemberStats();renderMemberSetoran();switchMemberTab('member');}
   if(id==='salary'){renderSalaryPage();}
   if(id==='order'){renderOrderTable();updateOrderTimer();}
+  if(id==='arsip'){switchArsipTab(activeArsipTab||'cumer');}
   if(id==='users'){fbLoadOperators().then(renderOperators);renderDiscordStatus();}
   if(id==='logs'){fbLoadLogs().then(renderLogs);}
 }
@@ -4076,12 +4100,22 @@ function renderMonthData(){
     done:data.filter(t=>t.status==='done').length};
   data.forEach(t=>{total.masuk+=t.jumlah;total.bersih+=t.bersih;
     total.profit+=t.profit||t.pot2;total.pajak+=t.pajak||0});
+
+  // Penghasilan/Profit Bersih bulan ini: Keuntungan Kotor − Alokasi Gaji (bobot cuci/backup) − Pajak HT
+  let totalAlokasiBulan=0;
+  data.forEach(tx=>{
+    const profitKotor=tx.profit||tx.pot2||0;
+    totalAlokasiBulan+=Math.round(profitKotor*0.33);
+  });
+  const profitBersihBulan=total.profit-totalAlokasiBulan-total.pajak;
+
   kpiEl.innerHTML=`
     <div class="mk"><div class="mk-lbl">TOTAL TRANSAKSI</div><div class="mk-val">${total.count}</div></div>
     <div class="mk"><div class="mk-lbl">UANG MERAH MASUK</div><div class="mk-val" style="color:var(--cr)">${fmt(total.masuk)}</div></div>
     <div class="mk"><div class="mk-lbl">UANG HIJAU KELUAR</div><div class="mk-val" style="color:var(--em)">${fmt(total.bersih)}</div></div>
     <div class="mk"><div class="mk-lbl">KEUNTUNGAN BFL</div><div class="mk-val" style="color:var(--gd)">${fmt(total.profit)}</div></div>
     <div class="mk"><div class="mk-lbl">PAJAK HIGH TABLE</div><div class="mk-val" style="color:var(--vi)">${fmt(total.pajak)}</div></div>
+    <div class="mk"><div class="mk-lbl">PENGHASILAN BERSIH</div><div class="mk-val" style="color:var(--em)">${fmt(profitBersihBulan)}</div><div style="font-family:var(--fm);font-size:0.55rem;color:var(--t3);margin-top:2px">Gaji: ${fmt(totalAlokasiBulan)} · Pajak: ${fmt(total.pajak)}</div></div>
     <div class="mk"><div class="mk-lbl">SUKSES RATE</div><div class="mk-val">${total.count>0?((total.done/total.count)*100).toFixed(1)+'%':'—'}</div></div>
   `;
   tbody.innerHTML=data.map((tx,i)=>`
@@ -4542,6 +4576,7 @@ async function checkAutoReset(){
       weeklyData={masuk:0,bersih:0,profit:0,pot1:0,pot2:0,pajak:0,count:0,startedAt:Date.now()};
       await fbSaveWeekly();
     }
+    await archiveCumerWeekIfNeeded();
   }
 }
 
@@ -4559,6 +4594,7 @@ async function initApp(){
   await fbLoadMasterBarang();
   await fbLoadMember();
   await fbLoadSalary();
+  await fbLoadArsipGaji();
   await fbLoadOrderStructure();
   await fbLoadOrder();
   await fbLoadOrderWebhook();
@@ -6677,9 +6713,10 @@ function renderSalaryCumer(){
   });
 
   if(summaryTbody){
-    const entries=Object.entries(perPekerjaWeek).sort((a,b)=>b[1].total-a[1].total);
+    const entries=Object.entries(perPekerjaWeek).filter(([nama])=>cumerPayStatus[nama]!=='lunas').sort((a,b)=>b[1].total-a[1].total);
+    const paidCount=Object.keys(perPekerjaWeek).length-entries.length;
     if(!entries.length){
-      summaryTbody.innerHTML='<tr><td colspan="5" style="text-align:center;padding:24px;color:var(--t3);font-family:var(--fm);font-size:0.7rem">Belum ada transaksi minggu ini</td></tr>';
+      summaryTbody.innerHTML='<tr><td colspan="5" style="text-align:center;padding:24px;color:var(--t3);font-family:var(--fm);font-size:0.7rem">'+(paidCount>0?'Semua pekerja minggu ini sudah dibayar ('+paidCount+' orang) · cek di Arsip saat reset minggu':'Belum ada transaksi minggu ini')+'</td></tr>';
     }else{
       summaryTbody.innerHTML=entries.map(([nama,data])=>{
         const isPaid=cumerPayStatus[nama]==='lunas';
@@ -6731,6 +6768,143 @@ async function toggleCumerPayStatus(nama){
   logActivity('CUMER_PAY_STATUS','Pekerja: '+nama+' → '+(cumerPayStatus[nama]==='lunas'?'SUDAH DIBAYAR':'BELUM DIBAYAR'));
   renderSalaryCumer();
 }
+
+// ─────────────────────────────────────────────────────────────────
+//  ARSIP GAJI (Nanam / Cumer / Jualan dll)
+// ─────────────────────────────────────────────────────────────────
+
+async function fbLoadArsipGaji(){
+  try{
+    const snap=await getDocs(collection(db,'arsipGaji'));
+    arsipGaji=[];
+    snap.forEach(d=>arsipGaji.push(d.data()));
+    arsipGaji.sort((a,b)=>(b.weekStart||0)-(a.weekStart||0));
+  }catch(e){ arsipGaji=[]; }
+}
+
+async function fbSaveArsipEntry(item){
+  try{
+    await setDoc(doc(db,'arsipGaji',item.id),item);
+  }catch(e){ console.error('Gagal simpan arsipGaji:',e); }
+}
+
+// Cek & arsipkan gaji Cumer minggu lalu (dipanggil saat auto-reset mingguan Senin 00:00 WIB)
+async function archiveCumerWeekIfNeeded(){
+  const wib=new Date(Date.now()+7*3600000);
+  // Tentukan rentang minggu LALU (yang baru saja berakhir)
+  const _day=wib.getDay();
+  const _diffToMon=_day===0?6:_day-1;
+  const _curMonStart=new Date(wib);
+  _curMonStart.setHours(0,0,0,0);
+  _curMonStart.setDate(wib.getDate()-_diffToMon);
+  const _prevMonStart=new Date(_curMonStart);
+  _prevMonStart.setDate(_curMonStart.getDate()-7);
+  const _prevMonStartUTC=_prevMonStart.getTime()-7*3600000;
+  const _prevSunEndUTC=_prevMonStartUTC+7*86400000;
+
+  const arsipId='cumer_'+_prevMonStartUTC;
+  if(arsipGaji.some(a=>a.id===arsipId))return; // sudah pernah diarsipkan
+
+  // Hitung perPekerja minggu lalu dari transaksi
+  const perPekerjaWeek={};
+  transactions.forEach(tx=>{
+    const ts=tx.ts||tx.createdAt||0;
+    if(ts<_prevMonStartUTC||ts>=_prevSunEndUTC)return;
+    const _ca=(tx.pekerjaCuci||tx.pekerja||'').split(',').map(s=>s.trim()).filter(Boolean);
+    const _ba=(tx.pekerjaBackup||'').split(',').map(s=>s.trim()).filter(Boolean);
+    if(!_ca.length&&!_ba.length)return;
+    const _pr=tx.profit||tx.pot2||0;
+    const _pool=Math.round(_pr*0.33);
+    const _tb=_ca.length*1+_ba.length*0.7;
+    if(!_tb)return;
+    const _gpp=_pool/_tb;
+    _ca.forEach(p=>{
+      if(!perPekerjaWeek[p])perPekerjaWeek[p]={total:0,count:0,role:'cuci'};
+      perPekerjaWeek[p].total+=Math.round(_gpp*1);
+      perPekerjaWeek[p].count++;
+    });
+    _ba.forEach(p=>{
+      if(!perPekerjaWeek[p])perPekerjaWeek[p]={total:0,count:0,role:'backup'};
+      perPekerjaWeek[p].total+=Math.round(_gpp*0.7);
+      perPekerjaWeek[p].count++;
+    });
+  });
+
+  if(!Object.keys(perPekerjaWeek).length)return; // tidak ada data minggu lalu
+
+  const _fd=d=>d.toLocaleDateString('id-ID',{day:'2-digit',month:'short',year:'numeric'});
+  const weekLabel=_fd(new Date(_prevMonStartUTC+7*3600000))+' — '+_fd(new Date(_prevSunEndUTC-86400000+7*3600000));
+
+  const data=Object.entries(perPekerjaWeek).map(([nama,d])=>({
+    nama,role:d.role,count:d.count,total:d.total,
+    status:cumerPayStatus[nama]==='lunas'?'lunas':'belum'
+  })).sort((a,b)=>b.total-a.total);
+
+  const item={id:arsipId,kategori:'cumer',weekLabel,weekStart:_prevMonStartUTC,weekEnd:_prevSunEndUTC,data,archivedAt:Date.now()};
+  arsipGaji.unshift(item);
+  await fbSaveArsipEntry(item);
+  // Reset status bayar untuk minggu baru
+  cumerPayStatus={};
+  await fbSaveCumerPayStatus();
+  logActivity('ARSIP_GAJI','[CUMER] Arsip minggu '+weekLabel+' ('+data.length+' pekerja)');
+  if(typeof renderSalaryCumer==='function')renderSalaryCumer();
+}
+
+function switchArsipTab(t){
+  activeArsipTab=t;
+  ['cumer','nanam','jualan'].forEach(k=>{
+    const btn=document.getElementById('arsip-tab-'+k);
+    if(btn){
+      btn.style.background=t===k?'var(--cr3)':'transparent';
+      btn.style.color=t===k?'var(--cr)':'var(--t3)';
+    }
+  });
+  renderArsipPage();
+}
+
+function renderArsipPage(){
+  const listEl=document.getElementById('arsip-list');
+  if(!listEl)return;
+  const entries=arsipGaji.filter(a=>a.kategori===activeArsipTab);
+  if(!entries.length){
+    listEl.innerHTML='<div style="padding:40px;text-align:center;color:var(--t3);font-family:var(--fm);font-size:0.7rem;letter-spacing:2px">BELUM ADA DATA ARSIP '+activeArsipTab.toUpperCase()+'</div>';
+    return;
+  }
+  listEl.innerHTML=entries.map(e=>{
+    const rows=(e.data||[]).map(d=>{
+      const isPaid=d.status==='lunas';
+      return`<tr>
+        <td style="font-weight:600">${d.nama}</td>
+        <td><span style="font-family:var(--fm);font-size:0.6rem;padding:2px 8px;border:1px solid ${d.role==='backup'?'rgba(255,184,0,0.4)':'rgba(168,85,247,0.4)'};color:${d.role==='backup'?'var(--gd)':'var(--vi)'}">${(d.role||'').toUpperCase()}</span></td>
+        <td style="font-family:var(--fm);color:var(--t3)">${d.count} transaksi</td>
+        <td style="font-family:var(--fw);font-size:0.95rem;color:var(--vi)">${fmt(d.total)}</td>
+        <td><span style="font-family:var(--fm);font-size:0.6rem;padding:4px 10px;border:1px solid ${isPaid?'rgba(0,255,148,0.4)':'rgba(255,45,85,0.3)'};color:${isPaid?'var(--em)':'var(--cr)'}">${isPaid?'✓ SUDAH DIBAYAR':'✗ BELUM DIBAYAR'}</span></td>
+      </tr>`;
+    }).join('');
+    const totalAll=(e.data||[]).reduce((a,d)=>a+d.total,0);
+    return`<div style="border:1px solid var(--ln);margin-bottom:16px;overflow:hidden">
+      <div style="padding:12px 16px;background:var(--s2);border-bottom:1px solid var(--ln);display:flex;justify-content:space-between;align-items:center">
+        <div>
+          <div style="font-family:var(--fm);font-size:0.5rem;color:var(--t3);letter-spacing:2px">MINGGU</div>
+          <div style="font-size:0.9rem;font-weight:600;margin-top:2px">${e.weekLabel}</div>
+        </div>
+        <div style="text-align:right">
+          <div style="font-family:var(--fm);font-size:0.5rem;color:var(--t3);letter-spacing:2px">TOTAL GAJI</div>
+          <div style="font-family:var(--fw);font-size:1rem;color:var(--gd);margin-top:2px">${fmt(totalAll)}</div>
+        </div>
+      </div>
+      <table style="width:100%;border-collapse:collapse">
+        <thead><tr style="text-align:left;font-family:var(--fm);font-size:0.55rem;color:var(--t3);letter-spacing:2px">
+          <th style="padding:10px 16px">PEKERJA</th><th>ROLE</th><th>JUMLAH</th><th>GAJI</th><th>STATUS</th>
+        </tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>`;
+  }).join('');
+}
+
+window.switchArsipTab=switchArsipTab;
+window.renderArsipPage=renderArsipPage;
 
 // ─────────────────────────────────────────────────────────────────
 //  END SALARY
