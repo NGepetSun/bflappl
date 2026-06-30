@@ -3933,7 +3933,10 @@ function updateDashboard(){
   // Cuci = 1 point, Backup = 0.7 point
   // Pool 33% dibagi proporsional sesuai bobot
   let totalAlokasi=0;
+  const _wkStart=weeklyData.startedAt||0;
   transactions.forEach(tx=>{
+    const ts=tx.ts||tx.createdAt||0;
+    if(ts<_wkStart)return; // skip transaksi sebelum reset mingguan terakhir
     const profitKotor=tx.profit||tx.pot2||0;
     const pool=Math.round(profitKotor*0.33);
     const cuci=(tx.pekerjaCuci||tx.pekerja||'').split(',').map(s=>s.trim()).filter(Boolean);
